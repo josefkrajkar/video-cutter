@@ -1,40 +1,49 @@
-# Welcome to Remix!
+# Video Cutter
 
-- 📖 [Remix docs](https://remix.run/docs)
+A web-based application for cutting and trimming videos directly in your browser.
+
+## Features
+
+- Browser-based video cutting
+- Real-time preview
+- Simple and intuitive user interface
+- Dark/light mode support
+- Responsive design
+
+## Tech Stack
+
+- [React](https://reactjs.org/)
+- [Remix](https://remix.run/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [shadcn/ui](https://ui.shadcn.com/) components
+
+## Installation
+
+1. Clone the repository
+2. Install dependencies:
+```bash
+yarn install
+```
 
 ## Development
 
-Run the dev server:
+To start the development server:
 
-```shellscript
-npm run dev
+```bash
+yarn dev
 ```
 
-## Deployment
+This will start the app in development mode. Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-First, build your app for production:
+## Building for Production
 
-```sh
-npm run build
+To create a production build:
+
+```bash
+yarn build
 ```
 
-Then run the app in production mode:
+## License
 
-```sh
-npm start
-```
-
-Now you'll need to pick a host to deploy it to.
-
-### DIY
-
-If you're familiar with deploying Node applications, the built-in Remix app server is production-ready.
-
-Make sure to deploy the output of `npm run build`
-
-- `build/server`
-- `build/client`
-
-## Styling
-
-This template comes with [Tailwind CSS](https://tailwindcss.com/) already configured for a simple default starting experience. You can use whatever css framework you prefer. See the [Vite docs on css](https://vitejs.dev/guide/features.html#css) for more information.
+MIT
