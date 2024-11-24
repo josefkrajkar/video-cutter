@@ -1,7 +1,8 @@
 {
   "name": "video-cutter",
-  "private": true,
+  "private": false,
   "sideEffects": false,
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "build": "remix vite:build",
@@ -11,12 +12,25 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@radix-ui/react-select": "^2.1.2",
+    "@radix-ui/react-slider": "^1.2.1",
+    "@radix-ui/react-slot": "^1.1.0",
     "@remix-run/node": "^2.15.0",
     "@remix-run/react": "^2.15.0",
     "@remix-run/serve": "^2.15.0",
+    "add": "^2.0.6",
+    "button": "^1.1.1",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "isbot": "^4.1.0",
+    "lucide-react": "^0.460.0",
+    "npx": "^10.2.2",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "shadcn": "^2.1.6",
+    "slider": "^1.0.4",
+    "tailwind-merge": "^2.5.4",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@remix-run/dev": "^2.15.0",

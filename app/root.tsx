@@ -7,6 +7,9 @@ import {
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 
+// Components
+import ErrorBoundary from "~/components/ErrorBoundary";
+
 import "./tailwind.css";
 
 export const links: LinksFunction = () => [
@@ -32,7 +35,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <ErrorBoundary fallback={<div>Sorry.. there was an error</div>}>
+          {children}
+        </ErrorBoundary>
         <ScrollRestoration />
         <Scripts />
       </body>
