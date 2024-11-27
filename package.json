@@ -2,7 +2,14 @@
   "name": "video-cutter",
   "private": false,
   "sideEffects": false,
-  "version": "0.0.1",
+  "version": "1.0.0",
+  "description": "A powerful web-based application that enables users to cut and trim videos directly in their browser.",
+  "author": {
+    "name": "Josef Krajkář",
+    "email": "josef.krajkar@mensa.cz",
+    "url": "https://github.com/josefkrajkar"
+  },
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "build": "remix vite:build",
