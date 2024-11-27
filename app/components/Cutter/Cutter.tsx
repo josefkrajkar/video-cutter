@@ -6,6 +6,13 @@ import { Play, Pause } from 'lucide-react';
 
 const FPS = 30;
 
+// Type declaration for HTMLVideoElement with captureStream
+declare global {
+  interface HTMLVideoElement {
+    captureStream(): MediaStream;
+  }
+}
+
 const VideoCutter = () => {
   const [video, setVideo] = useState<File | null>(null);
   const [videoUrl, setVideoUrl] = useState<string>('');
@@ -44,11 +51,13 @@ const VideoCutter = () => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file && file.type.startsWith('video/')) {
+    if (file && file.type === 'video/mp4') {
       setVideo(file);
       const url = URL.createObjectURL(file);
       setVideoUrl(url);
       setIsPlaying(false);
+    } else {
+      alert('Please select an MP4 video file');
     }
   };
 
@@ -73,7 +82,6 @@ const VideoCutter = () => {
 
   const handleTimeUpdate = () => {
     if (videoRef.current) {
-      // If current time is outside trim range, reset to start
       if (videoRef.current.currentTime < trimRange[0] || videoRef.current.currentTime > trimRange[1]) {
         videoRef.current.currentTime = trimRange[0];
       }
@@ -135,55 +143,65 @@ const VideoCutter = () => {
     if (!videoRef.current || !video) return;
     setIsProcessing(true);
 
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      setIsProcessing(false);
-      return;
-    }
+    try {
+      // Create a new video element for recording
+      const recordingVideo = document.createElement('video');
+      recordingVideo.src = videoUrl;
+      await new Promise((resolve) => {
+        recordingVideo.onloadedmetadata = resolve;
+      });
 
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
+      // Set the starting point
+      recordingVideo.currentTime = trimRange[0];
+      await new Promise((resolve) => {
+        recordingVideo.onseeked = resolve;
+      });
 
-    const stream = canvas.captureStream();
-    const mediaRecorder = new MediaRecorder(stream, {
-      mimeType: 'video/webm'
-    });
-
-    const chunks: Blob[] = [];
-    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(chunks, { type: 'video/webm' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `trimmed-video.webm`;
-      a.click();
-      URL.revokeObjectURL(url);
-      setIsProcessing(false);
-    };
-
-    mediaRecorder.start();
-
-    videoRef.current.currentTime = trimRange[0];
-    
-    const processFrame = () => {
-      if (!videoRef.current) return;
+      // Get the video stream
+      const stream = recordingVideo.captureStream();
       
-      ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+      // Create MediaRecorder with proper settings
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=h264',
+        videoBitsPerSecond: 8000000 // 8 Mbps for good quality
+      });
 
-      if (videoRef.current.currentTime < trimRange[1]) {
-        videoRef.current.currentTime += 1/FPS;
-        requestAnimationFrame(processFrame);
-      } else {
+      const chunks: Blob[] = [];
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(chunks, { type: 'video/mp4' });
+        const url = URL.createObjectURL(blob);
+        const originalName = video.name;
+        const baseName = originalName.substring(0, originalName.lastIndexOf('.')) || originalName;
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${baseName}-trimmed.mp4`;
+        a.click();
+        URL.revokeObjectURL(url);
+        setIsProcessing(false);
+      };
+
+      // Start recording
+      mediaRecorder.start(100); // Record in 100ms chunks
+      recordingVideo.play();
+
+      // Stop recording when we reach the end point
+      const duration = trimRange[1] - trimRange[0];
+      setTimeout(() => {
+        recordingVideo.pause();
         mediaRecorder.stop();
-      }
-    };
-
-    videoRef.current.onseeked = () => {
-      processFrame();
-      videoRef.current!.onseeked = null;
-    };
+        recordingVideo.remove();
+      }, duration * 1000);
+    } catch (error) {
+      console.error('Error during video export:', error);
+      setIsProcessing(false);
+      alert('An error occurred while exporting the video. Please try again.');
+    }
   };
 
   return (
@@ -195,7 +213,7 @@ const VideoCutter = () => {
         <div className="space-y-6">
           <input
             type="file"
-            accept="video/*"
+            accept="video/mp4"
             onChange={handleFileChange}
             className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
           />
