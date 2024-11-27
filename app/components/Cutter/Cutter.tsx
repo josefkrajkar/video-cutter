@@ -160,9 +160,13 @@ const VideoCutter = () => {
       // Get the video stream
       const stream = recordingVideo.captureStream();
       
+      const mimeType = MediaRecorder.isTypeSupported('video/mp4;codecs=avc1.42E01E,mp4a.40.2')
+        ? 'video/mp4;codecs=avc1.42E01E,mp4a.40.2'
+        : 'video/webm;codecs=vp9';
+
       // Create MediaRecorder with proper settings
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'video/webm;codecs=h264',
+        mimeType,
         videoBitsPerSecond: 8000000 // 8 Mbps for good quality
       });
 
@@ -191,12 +195,13 @@ const VideoCutter = () => {
       recordingVideo.play();
 
       // Stop recording when we reach the end point
-      const duration = trimRange[1] - trimRange[0];
-      setTimeout(() => {
-        recordingVideo.pause();
-        mediaRecorder.stop();
-        recordingVideo.remove();
-      }, duration * 1000);
+      recordingVideo.addEventListener('timeupdate', () => {
+        if (recordingVideo.currentTime >= trimRange[1]) {
+          recordingVideo.pause();
+          mediaRecorder.stop();
+          recordingVideo.remove();
+        }
+      });
     } catch (error) {
       console.error('Error during video export:', error);
       setIsProcessing(false);
