@@ -1,7 +1,16 @@
+import { useEffect } from 'react';
+
+// Components
 import { Slider } from '~/components/ui/slider';
 import { Button } from '~/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
+import Loader from '~/components/Loader/Loader';
+
+// Icons
 import { Play, Pause } from 'lucide-react';
+
+// Hooks
+import { useFfmpeg } from '~/hooks/useFfmpeg';
 
 const FPS = 30;
 
@@ -26,6 +35,15 @@ function CutterView({
   togglePlayPause, handleTrimRangeChange, exportVideo, estimatedSize, isProcessing,
   formatTime, videoRef
 }: CutterViewProps) {
+  const { isLoading } = useFfmpeg();
+
+  useEffect(() => {
+    if (!videoRef.current) return;
+    videoRef.current.currentTime = trimRange[0];
+  }, [trimRange]);
+
+  if (isLoading) return <Loader />;
+
   return (
     <Card className="w-full max-w-4xl p-4">
       <CardHeader>

@@ -1,6 +1,11 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
+
+// Components
 import CutterView from './components/View';
-import { trimVideo } from './utils/helpers';
+import Loader from '../Loader/Loader';
+
+// Hooks
+import { useFfmpeg } from '~/hooks/useFfmpeg';
 
 // Type declaration for HTMLVideoElement with captureStream
 declare global {
@@ -17,7 +22,13 @@ const VideoCutter = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [estimatedSize, setEstimatedSize] = useState<string>('');
-  
+  const [isOnClient, setIsOnClient] = useState(false);
+  const { handleTrim } = useFfmpeg();
+
+  useEffect(() => {
+    setIsOnClient(true);
+  }, []);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   
   const formatTime = (seconds: number): string => {
@@ -138,9 +149,11 @@ const VideoCutter = () => {
   const exportVideo = async () => {
     if (!video || !trimRange[0] || !trimRange[1]) return;
     setIsProcessing(true);
-    await trimVideo(video, trimRange[0], trimRange[1]);
+    await handleTrim(video, trimRange[0], trimRange[1]);
     setIsProcessing(false);
   };
+
+  if (!isOnClient) return <Loader />;
 
   return (
     <CutterView
